@@ -249,7 +249,7 @@ function showFinal(){hideAll();updateWhen();$('#when').style.display='';$('#row'
 $('#vid').addEventListener('ended',showWhere);$('#skip').addEventListener('click',showWhere);
 $('#wnext').addEventListener('click',()=>{if(!kind){$('#whint').textContent='Выбери, куда идём 🙂';return}if(SUBS[base]&&!sub){$('#whint').textContent='Выбери, что именно 🙂';return}showDT()});$('#dtdone').addEventListener('click',showFinal);
 
-const MAIL_TO='koyan1997@yandex.ru';
+const MAIL_TO='2e0d38ff3f03df48ec311376487f5c72';
 let lastSent='',sentOnce=false;
 function ruDate(){const d=$('#d').value;return d?new Date(d+'T00:00').toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'не выбрана'}
 async function sendResult(){

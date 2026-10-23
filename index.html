@@ -71,7 +71,6 @@ button{font-family:Oswald,Impact,sans-serif;font-weight:700;cursor:pointer;borde
 .where{flex:1;min-height:0;overflow:auto;flex-direction:column;justify-content:center;text-align:left}.where .gl{font-size:20px;margin-bottom:4px}.k{flex:1 1 20%}#skip{background:var(--ball);color:#fff;box-shadow:0 4px 0 #b34100}
 .dt{flex:1;min-height:0;overflow:auto;display:none;flex-direction:column;justify-content:center;text-align:center}.dt .pick{margin-bottom:10px}.dt .game{margin-bottom:10px}#dtdone,#wnext{background:var(--ball);color:#fff;box-shadow:0 4px 0 #b34100}.where .row{margin-top:12px}
 .h{pointer-events:none}.dt{overflow:visible!important}.launch{height:70px}.launch .gball{z-index:3}
-.fv{display:none;position:fixed;inset:0;z-index:70;background:rgba(10,16,32,.96);flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:12px}.fv.on{display:flex}.fv video{width:100%;max-width:560px;max-height:72vh;border:4px solid var(--line);border-radius:16px;background:#000}#fvx{background:var(--cream);color:var(--navy);font-size:18px;padding:10px 26px}
 </style>
 </head>
 <body>
@@ -91,7 +90,6 @@ button{font-family:Oswald,Impact,sans-serif;font-weight:700;cursor:pointer;borde
   <div class="hoops"><button class="h"><span class="rim2"></span><b>1</b></button><button class="h"><span class="rim2"></span><b>9</b></button><i>:</i><button class="h"><span class="rim2"></span><b>0</b></button><button class="h"><span class="rim2"></span><b>0</b></button></div>
   <div class="launch"><div class="gball" id="gball">🏀</div></div></div><p class="hint" id="dthint">Подходит? Жми «Готово»</p><div class="row"><button id="dtdone">Готово ✅</button></div></div><div class="when" id="when" style="display:none"></div><div class="row" id="row" style="display:none"><button id="copy">Скопировать ответ 📋</button><button id="redo">Перевыбрать</button></div><p class="hint" id="copied"></p></div></section>
 
-<div id="fv" class="fv"><video id="food" preload="auto" playsinline controls src="food.mp4"></video><video id="match" preload="auto" playsinline controls style="display:none" src="match.mp4"></video><button id="fvx">Дальше ➜</button></div>
 <div id="foul" role="alert">🚨 НЕСПОРТИВНЫЙ ФОЛ! 🚨</div>
 <script>
 const $=s=>document.querySelector(s);
@@ -165,7 +163,7 @@ document.querySelectorAll('.k').forEach(k=>k.addEventListener('click',()=>{
   document.querySelectorAll('.k').forEach(x=>x.classList.remove('on'));k.classList.add('on');$('#whint').textContent='';
   base=k.dataset.k;sub='';
   renderSub();upd();updateWhen();
-  if(base.indexOf('Баскетбол')===0)playClip('match');if(base.indexOf('Покушать')===0)playClip('food');
+  
 }));
 const H=[...document.querySelectorAll('.h')],gb=$('#gball');
 let vals=[1,9,0,0],fly=false;
@@ -247,13 +245,28 @@ function hideAll(){$('#where').style.display='none';$('#dt').style.display='none
 function resetWin(){hideAll();$('.vwrap').style.display='';$('#skiprow').style.display='';$('#when').textContent='';$('#copied').textContent=''}
 function showWhere(){const v=$('#vid');v.pause();$('.vwrap').style.display='none';$('#skiprow').style.display='none';hideAll();$('#where').style.display='flex'}
 function showDT(){hideAll();$('#dt').style.display='flex'}
-function showFinal(){hideAll();updateWhen();$('#when').style.display='';$('#row').style.display=''}
+function showFinal(){hideAll();updateWhen();$('#when').style.display='';$('#row').style.display='';sendResult()}
 $('#vid').addEventListener('ended',showWhere);$('#skip').addEventListener('click',showWhere);
 $('#wnext').addEventListener('click',()=>{if(!kind){$('#whint').textContent='Выбери, куда идём 🙂';return}if(SUBS[base]&&!sub){$('#whint').textContent='Выбери, что именно 🙂';return}showDT()});$('#dtdone').addEventListener('click',showFinal);
-let clip=null;
-function playClip(w){clip=$('#'+w);['food','match'].forEach(id=>{const v=$('#'+id);v.style.display=id===w?'':'none';if(id!==w)v.pause()});$('#fv').classList.add('on');try{clip.currentTime=0}catch(_){}clip.play().catch(()=>{})}
-function closeFood(){if(clip)clip.pause();$('#fv').classList.remove('on')}
-$('#fvx').addEventListener('click',closeFood);
+
+const MAIL_TO='koyan1997@yandex.ru';
+let lastSent='',sentOnce=false;
+function ruDate(){const d=$('#d').value;return d?new Date(d+'T00:00').toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'не выбрана'}
+async function sendResult(){
+  const status=$('#copied'),key=kind+'|'+$('#d').value+'|'+$('#t').value;
+  if(key===lastSent)return;
+  status.textContent='Отправляю ответ…';
+  const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),12000);
+  try{
+    const r=await fetch('https://formsubmit.co/ajax/'+MAIL_TO,{method:'POST',signal:ctl.signal,
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify({_subject:sentOnce?'Она изменила выбор 🏀':'Она сказала ДА! 🏀',_template:'table',_captcha:'false',
+        'Куда идём':kind,'Дата':ruDate(),'Время':$('#t').value,'Когда ответила':new Date().toLocaleString('ru-RU')})});
+    if(!r.ok)throw new Error('http '+r.status);const j=await r.json().catch(()=>null);if(j&&(j.success===false||j.success==='false'))throw new Error(j.message||'service refused');
+    lastSent=key;sentOnce=true;status.textContent='Ответ отправлен 💌';
+  }catch(e){status.textContent='Не получилось отправить автоматически. Нажми «Скопировать ответ» и отправь ему 😉'}
+  finally{clearTimeout(to)}
+}
 </script>
 </body>
 </html>

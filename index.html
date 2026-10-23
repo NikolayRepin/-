@@ -71,6 +71,8 @@ button{font-family:Oswald,Impact,sans-serif;font-weight:700;cursor:pointer;borde
 .where{flex:1;min-height:0;overflow:auto;flex-direction:column;justify-content:center;text-align:left}.where .gl{font-size:20px;margin-bottom:4px}.k{flex:1 1 20%}#skip{background:var(--ball);color:#fff;box-shadow:0 4px 0 #b34100}
 .dt{flex:1;min-height:0;overflow:auto;display:none;flex-direction:column;justify-content:center;text-align:center}.dt .pick{margin-bottom:10px}.dt .game{margin-bottom:10px}#dtdone,#wnext{background:var(--ball);color:#fff;box-shadow:0 4px 0 #b34100}.where .row{margin-top:12px}
 .h{pointer-events:none}.dt{overflow:visible!important}.launch{height:70px}.launch .gball{z-index:3}
+.scene{position:absolute;inset:0;z-index:0;display:none;pointer-events:none}.scene svg{width:100%;height:100%;display:block}.scene::after{content:"";position:absolute;inset:0;background:rgba(10,16,32,.28)}#win.dtmode .scene{display:block}#win .meme{position:relative;z-index:1}#win.dtmode .dt{flex:0 0 auto;margin:auto 0;background:rgba(20,33,61,.56);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);border:3px solid var(--line);border-radius:20px;padding:16px 12px}#win.dtmode .dt .gl,#win.dtmode .dt label,#win.dtmode .dt .hint{text-shadow:0 1px 3px #000,0 0 6px #000}
+#win.dtmode .dt{margin:2vh 0 auto}
 </style>
 </head>
 <body>
@@ -83,7 +85,7 @@ button{font-family:Oswald,Impact,sans-serif;font-weight:700;cursor:pointer;borde
   <p class="hint" id="hint">Подумай хорошенько. Вариантов немного 😏</p>
 </main>
 
-<section id="win" aria-live="polite"><div class="meme"><div class="vwrap"><video id="vid" class="vid" preload="auto" webkit-playsinline src="video.mp4" playsinline controls></video><div class="vcap">ОНА СКАЗАЛА «ДА»!!!</div></div><div class="row" id="skiprow"><button id="skip">Куда идём? ➜</button></div><div id="where" class="where" style="display:none"><div class="kinds"><div class="gl">КУДА ИДЁМ?</div><div class="kr"><button class="k" data-k="Баскетбольный матч 🏀">🏀<span>Матч</span></button><button class="k" data-k="Кино 🎬">🎬<span>Кино</span></button><button class="k" data-k="Прогулка 🚶‍♀️">🚶‍♀️<span>Прогулка</span></button><button class="k" data-k="Покушать 🍴">🍕<span>Покушать</span></button></div></div><div class="sub" id="sub"></div><p class="hint" id="whint"></p><div class="row"><button id="wnext">Дальше ➜</button></div></div><div id="dt" class="dt" style="display:none"><div class="pick">
+<section id="win" aria-live="polite"><div class="scene" id="scene" aria-hidden="true"></div><div class="meme"><div class="vwrap"><video id="vid" class="vid" preload="auto" webkit-playsinline src="yes-v2.mp4" playsinline controls></video><div class="vcap">ОНА СКАЗАЛА «ДА»!!!</div></div><div class="row" id="skiprow"><button id="skip">Куда идём? ➜</button></div><div id="where" class="where" style="display:none"><div class="kinds"><div class="gl">КУДА ИДЁМ?</div><div class="kr"><button class="k" data-k="Баскетбольный матч 🏀">🏀<span>Матч</span></button><button class="k" data-k="Кино 🎬">🎬<span>Кино</span></button><button class="k" data-k="Прогулка 🚶‍♀️">🚶‍♀️<span>Прогулка</span></button><button class="k" data-k="Покушать 🍴">🍕<span>Покушать</span></button></div></div><div class="sub" id="sub"></div><p class="hint" id="whint"></p><div class="row"><button id="wnext">Дальше ➜</button></div></div><div id="dt" class="dt" style="display:none"><div class="pick">
     <div><label for="d">ДАТА</label><input type="date" id="d"></div>
     <input type="hidden" id="t">
   </div><div class="game"><div class="gl">ВРЕМЯ: ПЕРЕТАЩИ МЯЧ В КОЛЬЦО. КАЖДОЕ ПОПАДАНИЕ МЕНЯЕТ ЦИФРУ НА +1</div>
@@ -241,10 +243,10 @@ gb.addEventListener('pointerup',release);gb.addEventListener('pointercancel',rel
 render();
 $('#redo').addEventListener('click',()=>{$('#copied').textContent='';$('#dt').style.display='none';$('#when').style.display='none';$('#row').style.display='none';$('#where').style.display='flex'});
 function updateWhen(){$('#when').textContent=kind+': '+fmt()+'. Не опаздывай!'}
-function hideAll(){$('#where').style.display='none';$('#dt').style.display='none';$('#when').style.display='none';$('#row').style.display='none'}
+function hideAll(){$('#win').classList.remove('dtmode');$('#where').style.display='none';$('#dt').style.display='none';$('#when').style.display='none';$('#row').style.display='none'}
 function resetWin(){hideAll();$('.vwrap').style.display='';$('#skiprow').style.display='';$('#when').textContent='';$('#copied').textContent=''}
 function showWhere(){const v=$('#vid');v.pause();$('.vwrap').style.display='none';$('#skiprow').style.display='none';hideAll();$('#where').style.display='flex'}
-function showDT(){hideAll();$('#dt').style.display='flex'}
+function showDT(){hideAll();$('#scene').innerHTML='<svg viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice">'+SC[sceneKey()]()+'</svg>';$('#win').classList.add('dtmode');$('#dt').style.display='flex'}
 function showFinal(){hideAll();updateWhen();$('#when').style.display='';$('#row').style.display='';sendResult()}
 $('#vid').addEventListener('ended',showWhere);$('#skip').addEventListener('click',showWhere);
 $('#wnext').addEventListener('click',()=>{if(!kind){$('#whint').textContent='Выбери, куда идём 🙂';return}if(SUBS[base]&&!sub){$('#whint').textContent='Выбери, что именно 🙂';return}showDT()});$('#dtdone').addEventListener('click',showFinal);
@@ -252,21 +254,102 @@ $('#wnext').addEventListener('click',()=>{if(!kind){$('#whint').textContent='В�
 const MAIL_TO='2e0d38ff3f03df48ec311376487f5c72';
 let lastSent='',sentOnce=false;
 function ruDate(){const d=$('#d').value;return d?new Date(d+'T00:00').toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'не выбрана'}
-async function sendResult(){
+function sendResult(){
   const status=$('#copied'),key=kind+'|'+$('#d').value+'|'+$('#t').value;
   if(key===lastSent)return;
-  status.textContent='Отправляю ответ…';
-  const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),12000);
+  lastSent=key;status.textContent='Ответ отправлен 💌';
+  const subject=sentOnce?'Она изменила выбор 🏀':'Она сказала ДА! 🏀';sentOnce=true;
   try{
-    const r=await fetch('https://formsubmit.co/ajax/'+MAIL_TO,{method:'POST',signal:ctl.signal,
+    fetch('https://formsubmit.co/ajax/'+MAIL_TO,{method:'POST',keepalive:true,
       headers:{'Content-Type':'application/json','Accept':'application/json'},
-      body:JSON.stringify({_subject:sentOnce?'Она изменила выбор 🏀':'Она сказала ДА! 🏀',_template:'table',_captcha:'false',
-        'Куда идём':kind,'Дата':ruDate(),'Время':$('#t').value,'Когда ответила':new Date().toLocaleString('ru-RU')})});
-    if(!r.ok)throw new Error('http '+r.status);const j=await r.json().catch(()=>null);if(j&&(j.success===false||j.success==='false'))throw new Error(j.message||'service refused');
-    lastSent=key;sentOnce=true;status.textContent='Ответ отправлен 💌';
-  }catch(e){status.textContent='Не получилось отправить автоматически. Нажми «Скопировать ответ» и отправь ему 😉'}
-  finally{clearTimeout(to)}
+      body:JSON.stringify({_subject:subject,_template:'table',_captcha:'false',
+        'Куда идём':kind,'Дата':ruDate(),'Время':$('#t').value,'Когда ответила':new Date().toLocaleString('ru-RU')})})
+      .catch(e=>console.warn('send failed',e));
+  }catch(e){console.warn('send failed',e)}
 }
+const SC={
+match(){let seed=7;const r=()=>(seed=(seed*16807)%2147483647)/2147483647;
+ let o='<rect width="400" height="800" fill="#141c36"/>';
+ const skin=['#f2c9a0','#d9a273','#a8744f','#f7d6b5'],shirt=['#ff6b1a','#fff3dc','#2f4f9d','#ff6b1a','#ffd166','#e63946'];
+ for(let row=0;row<10;row++){const y=22+row*42;
+  o+=`<rect x="0" y="${y-18}" width="400" height="42" fill="${row%2?'#2a3868':'#34447c'}"/>`;
+  for(let x=-6+(row%2)*12;x<410;x+=24){const jx=x+r()*6;
+   o+=`<rect x="${jx-8}" y="${y+4}" width="16" height="17" rx="5" fill="${shirt[Math.floor(r()*shirt.length)]}"/><circle cx="${jx}" cy="${y}" r="7" fill="${skin[Math.floor(r()*skin.length)]}"/>`}}
+ o+='<rect x="0" y="440" width="400" height="26" fill="#ff6b1a"/><rect x="0" y="440" width="400" height="5" fill="#14213d"/>';
+ for(let x=0;x<400;x+=80)o+=`<rect x="${x+10}" y="450" width="60" height="10" rx="3" fill="#fff3dc" opacity=".85"/>`;
+ o+='<rect x="0" y="466" width="400" height="334" fill="#c98a4b"/>';
+ for(let x=0;x<400;x+=24)o+=`<rect x="${x}" y="466" width="2" height="334" fill="#b97a3d"/>`;
+ o+='<g fill="none" stroke="#fff3dc" stroke-width="4"><rect x="140" y="466" width="120" height="150"/><path d="M140 616a60 60 0 0 0 120 0"/><path d="M50 466v50a150 150 0 0 0 300 0v-50"/></g>';
+ o+='<rect x="172" y="472" width="56" height="34" fill="#fff" opacity=".92" stroke="#14213d" stroke-width="3"/><rect x="192" y="485" width="16" height="13" fill="none" stroke="#e63946" stroke-width="2"/><ellipse cx="200" cy="512" rx="14" ry="4.5" fill="none" stroke="#ff6b1a" stroke-width="4"/>';
+ o+='<circle cx="318" cy="722" r="26" fill="#ff6b1a" stroke="#8c3a0a" stroke-width="2"/><path d="M292 722h52M318 696v52M300 704q18 18 0 36M336 704q-18 18 0 36" stroke="#8c3a0a" stroke-width="2" fill="none"/><ellipse cx="318" cy="752" rx="24" ry="5" fill="#000" opacity=".18"/>';
+ return o},
+cinema(){let o='<defs><linearGradient id="scr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffbe9"/><stop offset="1" stop-color="#a9cdf5"/></linearGradient></defs><rect width="400" height="800" fill="#1b0b14"/>';
+ o+='<polygon points="200,0 84,470 316,470" fill="#fff" opacity=".07"/>';
+ for(let y=60;y<420;y+=90)o+=`<rect x="8" y="${y}" width="10" height="28" rx="4" fill="#ffd166" opacity=".8"/><rect x="382" y="${y}" width="10" height="28" rx="4" fill="#ffd166" opacity=".8"/>`;
+ o+='<rect x="76" y="462" width="248" height="156" rx="6" fill="#b9d8ff" opacity=".3"/><rect x="88" y="474" width="224" height="132" fill="url(#scr)"/>';
+ for(let i=0;i<3;i++){const c=i%2?'#8c1c2b':'#a32436';o+=`<rect x="${52+i*10}" y="452" width="11" height="170" fill="${c}"/><rect x="${318-i*10}" y="452" width="11" height="170" fill="${c}"/>`}
+ o+='<rect x="48" y="440" width="304" height="22" fill="#7a1523"/>';
+ for(let x=48;x<352;x+=38)o+=`<circle cx="${x+19}" cy="462" r="13" fill="#7a1523"/>`;
+ o+='<rect x="0" y="618" width="400" height="40" fill="#2a1220"/>';
+ for(let row=0;row<2;row++){const y=664+row*60,w=54+row*20,gap=w+8,n=Math.ceil(420/gap);
+  for(let k=0;k<n;k++){const x=k*gap-(n*gap-400)/2;
+   o+=`<rect x="${x}" y="${y}" width="${w}" height="${w*1.05}" rx="${w*.3}" fill="${row%2?'#8b1d30':'#9c2438'}"/><rect x="${x+4}" y="${y+w*.7}" width="${w-8}" height="${w*.3}" rx="6" fill="#6e1424"/>`}
+  if(row===0)o+='<g fill="#0d0508"><circle cx="168" cy="690" r="18"/><ellipse cx="168" cy="740" rx="32" ry="26"/><circle cx="232" cy="694" r="18"/><ellipse cx="232" cy="744" rx="32" ry="26"/></g>'}
+ return o},
+walk(){let seed=11;const r=()=>(seed=(seed*16807)%2147483647)/2147483647;
+ let o='<defs><linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff8f5e"/><stop offset=".75" stop-color="#ffd9a0"/></linearGradient><linearGradient id="wt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6d8fb3"/><stop offset="1" stop-color="#35597f"/></linearGradient></defs>';
+ o+='<rect width="400" height="320" fill="url(#sk)"/><circle cx="290" cy="250" r="66" fill="#fff1c2" opacity=".35"/><circle cx="290" cy="250" r="38" fill="#fff1c2"/>';
+ const hs=[40,70,52,90,60,110,48,80,64,96];
+ hs.forEach((h,i)=>{o+=`<rect x="${i*42-4}" y="${300-h}" width="40" height="${h}" fill="#8e5f6e"/>`;for(let k=0;k<h/18-1;k++)o+=`<rect x="${i*42+4}" y="${300-h+8+k*18}" width="6" height="8" fill="#ffd9a0" opacity=".7"/><rect x="${i*42+20}" y="${300-h+8+k*18}" width="6" height="8" fill="#ffd9a0" opacity=".7"/>`});
+ o+='<rect y="300" width="400" height="230" fill="url(#wt)"/>';
+ for(let i=0;i<7;i++)o+=`<rect x="${290-(60-i*6)/2}" y="${312+i*18}" width="${60-i*6}" height="4" rx="2" fill="#fff1c2" opacity=".55"/>`;
+ for(let i=0;i<26;i++){const x=r()*380,y=320+r()*190;o+=`<rect x="${x}" y="${y}" width="${14+r()*20}" height="2" rx="1" fill="#fff" opacity=".28"/>`}
+ o+='<rect y="520" width="400" height="280" fill="#d9c8ae"/>';
+ for(let y=548;y<800;y+=30+((y-548)/10))o+=`<rect y="${y}" width="400" height="2" fill="#b9a68a"/>`;
+ for(let i=-4;i<=12;i++)o+=`<path d="M${i*40+20} 520L${i*70-110} 800" stroke="#b9a68a" stroke-width="2"/>`;
+ o+='<rect y="505" width="400" height="26" fill="#6b6f7a"/><rect y="505" width="400" height="5" fill="#8b909c"/><rect y="472" width="400" height="5" fill="#2a2f3a"/>';
+ for(let x=6;x<400;x+=30)o+=`<rect x="${x}" y="472" width="4" height="33" fill="#2a2f3a"/>`;
+ [48,352].forEach(x=>{o+=`<circle cx="${x}" cy="372" r="34" fill="#fff4c9" opacity=".3"/><rect x="${x-3}" y="384" width="6" height="136" fill="#2a2f3a"/><circle cx="${x}" cy="372" r="13" fill="#fff4c9"/>`});
+ const person=(x,y,shirt,skirt)=>{const leg=skirt?'#f2c9a0':'#2d3550';return `<g transform="translate(${x} ${y})"><ellipse cx="0" cy="14" rx="20" ry="4" fill="#000" opacity=".18"/><rect x="-5" y="-18" width="9" height="34" rx="4" fill="${leg}" transform="rotate(-16 0 -18)"/><rect x="-4" y="-18" width="9" height="34" rx="4" fill="${leg}" transform="rotate(16 0 -18)"/>`+(skirt?`<path d="M-13 -26L13 -26L18 -6L-18 -6Z" fill="${skirt}"/>`:'')+`<rect x="-17" y="-48" width="7" height="26" rx="3.5" fill="${shirt}" transform="rotate(14 -13 -46)"/><rect x="10" y="-48" width="7" height="26" rx="3.5" fill="${shirt}" transform="rotate(-14 13 -46)"/><rect x="-12" y="-52" width="24" height="36" rx="9" fill="${shirt}"/><circle cx="0" cy="-62" r="11" fill="#f2c9a0"/><path d="M-11 -64a11 11 0 0 1 22 0c-6-6-16-6-22 0z" fill="${skirt?'#5a3a2a':'#2a1f1a'}"/></g>`};
+ o+=person(168,705,'#ff6b1a','')+person(226,705,'#e4577a','#e4577a');
+ return o},
+burger(){let seed=5;const r=()=>(seed=(seed*16807)%2147483647)/2147483647;
+ let o='<rect width="400" height="800" fill="#8b5a3c"/>';
+ for(let y=0;y<800;y+=64)o+=`<rect y="${y}" width="400" height="4" fill="#6b4029"/>`;
+ for(let i=0;i<9;i++){const x=r()*400,y=r()*150;o+=`<rect x="${x}" y="${y}" width="8" height="64" rx="3" fill="#ffd166" transform="rotate(${r()*160-80} ${x} ${y})"/>`}
+ o+='<g transform="translate(200 720) scale(.85) translate(-200 -720)">';o+='<ellipse cx="200" cy="744" rx="170" ry="30" fill="#fff"/><ellipse cx="200" cy="740" rx="140" ry="22" fill="#eee6d8"/>';
+ o+='<rect x="98" y="694" width="204" height="40" rx="18" fill="#d99a4e"/><rect x="92" y="664" width="216" height="34" rx="16" fill="#5a2f1b"/>';
+ for(let i=0;i<14;i++)o+=`<circle cx="${104+r()*192}" cy="${672+r()*18}" r="2.2" fill="#3b1c0f"/>`;
+ o+='<rect x="90" y="650" width="220" height="14" fill="#ffc43d"/><polygon points="126,664 152,664 138,688" fill="#ffc43d"/><polygon points="238,664 266,664 252,686" fill="#ffc43d"/><rect x="96" y="636" width="208" height="15" rx="7" fill="#e63946"/>';
+ let p='M88 640';for(let x=88;x<312;x+=24)p+=`q12 -18 24 0`;
+ o+=`<path d="${p}V652H88z" fill="#6bbf59"/><path d="M96 636a104 72 0 0 1 208 0z" fill="#e0a24f"/><path d="M118 600a90 60 0 0 1 60-34" stroke="#f3c47c" stroke-width="8" stroke-linecap="round" fill="none"/>`;
+ for(let i=0;i<16;i++){const x=130+r()*140,y=574+r()*46;o+=`<ellipse cx="${x}" cy="${y}" rx="5" ry="2.6" fill="#fff3dc" transform="rotate(${r()*90-45} ${x} ${y})"/>`}
+ o+='</g>';return o},
+pizza(){let seed=9;const r=()=>(seed=(seed*16807)%2147483647)/2147483647;
+ let o='<rect width="400" height="800" fill="#f6ebd8"/>';
+ for(let y=0;y<800;y+=50)for(let x=((y/50)%2)*50;x<400;x+=100)o+=`<rect x="${x}" y="${y}" width="50" height="50" fill="#d9463a" opacity=".85"/>`;
+ for(let i=0;i<7;i++){const x=r()*400,y=r()*170;o+=`<path d="M${x} ${y}q14 -22 28 0q-14 22 -28 0z" fill="#4f9d4a" transform="rotate(${r()*180} ${x} ${y})"/>`}
+ o+='<g transform="translate(200 650) scale(.8) translate(-200 -650)">';o+='<circle cx="200" cy="640" r="170" fill="#a8744f"/><circle cx="200" cy="640" r="146" fill="#e0a24f"/><circle cx="200" cy="640" r="128" fill="#d9462e"/><circle cx="200" cy="640" r="120" fill="#f6c85f"/>';
+ for(let i=0;i<12;i++){const a=r()*6.28,d=Math.sqrt(r())*104;o+=`<circle cx="${200+Math.cos(a)*d}" cy="${640+Math.sin(a)*d}" r="${7+r()*6}" fill="#fff3b0" opacity=".7"/>`}
+ for(let i=0;i<9;i++){const a=i*0.7+.2,d=i%2?48:88;o+=`<circle cx="${200+Math.cos(a)*d}" cy="${640+Math.sin(a)*d}" r="17" fill="#c4372f"/><circle cx="${200+Math.cos(a)*d-4}" cy="${640+Math.sin(a)*d-4}" r="3" fill="#e5645a"/>`}
+ for(let i=0;i<6;i++){const a=i*1.05+.5,d=70;o+=`<circle cx="${200+Math.cos(a)*d}" cy="${640+Math.sin(a)*d}" r="6" fill="#2a1f1a"/><circle cx="${200+Math.cos(a)*d}" cy="${640+Math.sin(a)*d}" r="2.4" fill="#f6c85f"/>`}
+ for(let i=0;i<4;i++){const a=i*1.57+.9,d=98;o+=`<path d="M${200+Math.cos(a)*d} ${640+Math.sin(a)*d}q10 -16 20 0q-10 16 -20 0z" fill="#4f9d4a" transform="rotate(${i*50} ${200+Math.cos(a)*d} ${640+Math.sin(a)*d})"/>`}
+ o+='<g stroke="#b97a3d" stroke-width="2" opacity=".6"><path d="M200 520V760"/><path d="M80 640H320"/><path d="M115 555L285 725"/><path d="M285 555L115 725"/></g>';
+ o+='</g>';return o},
+khach(){let seed=3;const r=()=>(seed=(seed*16807)%2147483647)/2147483647;
+ let o='<rect width="400" height="800" fill="#efe1c6"/>';
+ for(let x=0;x<400;x+=56)o+=`<rect x="${x}" width="26" height="800" fill="#2f6b4f" opacity=".12"/>`;
+ for(let i=0;i<8;i++){const x=r()*400,y=r()*170;o+=`<path d="M${x} ${y}q14 -22 28 0q-14 22 -28 0z" fill="#4f9d4a" transform="rotate(${r()*180} ${x} ${y})"/>`}
+ o+='<circle cx="330" cy="60" r="34" fill="#ffd166"/><circle cx="330" cy="60" r="26" fill="#fff0a0"/><g stroke="#ffd166" stroke-width="2"><path d="M330 60V36M330 60V84M330 60H306M330 60H354M330 60l17-17M330 60l-17 17M330 60l17 17M330 60l-17-17"/></g>';
+ o+='<g transform="translate(200 670) scale(.8) translate(-200 -670)">';o+='<ellipse cx="200" cy="660" rx="185" ry="130" fill="#a8744f"/><ellipse cx="200" cy="660" rx="170" ry="116" fill="#c98a4b"/>';
+ o+='<path d="M52 660C110 548 290 548 348 660C290 772 110 772 52 660Z" fill="#d99a4e"/><path d="M52 660C110 548 290 548 348 660" stroke="#e8b46a" stroke-width="10" fill="none"/>';
+ for(let i=0;i<9;i++){const t=i/8,x=74+t*252,y=660-Math.sin(t*Math.PI)*88+10;o+=`<ellipse cx="${x}" cy="${y}" rx="9" ry="4" fill="#b9772f" transform="rotate(${-40+t*80} ${x} ${y})"/>`}
+ o+='<path d="M90 660C140 596 260 596 310 660C260 724 140 724 90 660Z" fill="#fbe39a"/><path d="M120 650C150 616 250 616 280 650" stroke="#fff3c7" stroke-width="8" stroke-linecap="round" fill="none" opacity=".8"/>';
+ o+='<circle cx="200" cy="662" r="38" fill="#ffb703"/><circle cx="200" cy="662" r="38" fill="none" stroke="#fff3dc" stroke-width="5" opacity=".7"/><circle cx="188" cy="650" r="9" fill="#fff" opacity=".55"/>';
+ o+='<rect x="240" y="684" width="30" height="22" rx="4" fill="#fff3b0" transform="rotate(-12 255 695)"/><rect x="240" y="684" width="30" height="7" rx="3" fill="#fffbe0" transform="rotate(-12 255 695)"/>';
+ for(let i=0;i<7;i++){const x=120+r()*160,y=640+r()*50;o+=`<ellipse cx="${x}" cy="${y}" rx="5" ry="2" fill="#4f9d4a" transform="rotate(${r()*180} ${x} ${y})"/>`}
+ o+='</g>';return o}};
+function sceneKey(){return base.indexOf('Баскет')===0?'match':base.indexOf('Кино')===0?'cinema':base.indexOf('Прогул')===0?'walk':sub.indexOf('Бургер')===0?'burger':sub.indexOf('Хачапури')===0?'khach':'pizza'}
 </script>
 </body>
 </html>
